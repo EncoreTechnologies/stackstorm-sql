@@ -1,12 +1,8 @@
 # Change Log
 
-## 1.1.4
-
-- Added the ability to return rows if there were results to return from procedure call.
-  Contributed by Bradley Bishop (Encore Technologies)
-
 ## 1.1.3
 
+- Added the ability to return rows if there were results to return from procedure call.
 - Added new action to run SQL Procedures
   Contributed by Bradley Bishop (Encore Technologies)
 
