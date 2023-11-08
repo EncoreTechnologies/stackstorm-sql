@@ -106,6 +106,18 @@ class BaseAction(Action):
 
         return sql_obj
 
+    def build_connection(self, kwargs_dict):
+        # Get the connection details from either config or from action params
+        connection = self.resolve_connection(kwargs_dict)
+
+        # Update Driver with a connector
+        default_driver = DEFAULT_KNOWN_DRIVER_CONNECTORS.get(connection['drivername'], None)
+        if default_driver:
+            connection['drivername'] = default_driver
+
+        # Format the connection string
+        return URL(**connection)
+
     @contextmanager
     def db_connection(self, kwargs_dict):
         """Connect to the database and instantiate necessary methods to be used
