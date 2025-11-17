@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.1.4
+
+- Fixed several install and run issues related to updates to SQLAlchemy
+  Contributed by Bradley Bishop (Encore Technologies)
+
 ## 1.1.3
 
 - Added the ability to return rows if there were results to return from procedure call.

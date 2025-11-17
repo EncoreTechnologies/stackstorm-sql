@@ -1,6 +1,6 @@
-sqlalchemy~=2.0.3
-psycopg2 <=2.8
+psycopg2-binary<=2.8.6
+sqlalchemy
 pymysql
-pymssql<3.0
+pymssql==2.2.11
 cx_Oracle<=7.3.0
 fdb

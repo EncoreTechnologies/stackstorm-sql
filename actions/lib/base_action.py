@@ -61,8 +61,8 @@ class BaseAction(Action):
         returns: dictionary of values
         """
         return_dict = {}
-        for column in row._asdict().keys():
-            value = getattr(row, column)
+        for column in row._mapping.keys():
+            value = row._mapping[column]
 
             if isinstance(value, datetime.date):
                 return_dict[column] = value.isoformat()
@@ -114,6 +114,10 @@ class BaseAction(Action):
         default_driver = DEFAULT_KNOWN_DRIVER_CONNECTORS.get(connection['drivername'], None)
         if default_driver:
             connection['drivername'] = default_driver
+        
+        # Fix issue with required query param
+        # https://docs.sqlalchemy.org/en/20/core/engines.html#sqlalchemy.engine.URL.query
+        connection['query'] = {}
 
         # Format the connection string
         return URL(**connection)
@@ -123,24 +127,8 @@ class BaseAction(Action):
         """Connect to the database and instantiate necessary methods to be used
         later.
         """
-        # Get the connection details from either config or from action params
-        connection = self.resolve_connection(kwargs_dict)
-
-        # Update Driver with a connector
-        default_driver = DEFAULT_KNOWN_DRIVER_CONNECTORS.get(connection['drivername'], None)
-        if default_driver:
-            connection['drivername'] = default_driver
-
-        # Check if query is in de connection
-        # We use a immutabledict as required by the documentation of sqlalchemy instead of a tuple.
-        # Because sqlalchemy made for this funtions its own 'datatype' that it knows how to handle.
-        # Aimes to be compatible with tuple but not fully.
-        # https://www.programcreek.com/python/example/58798/sqlalchemy.util.immutabledict
-        if 'query' not in connection:
-            connection['query'] = sqlalchemy.util.immutabledict()
-
         # Format the connection string
-        database_connection_string = URL(**connection)
+        database_connection_string = self.build_connection(kwargs_dict)
 
         self.engine = sqlalchemy.create_engine(database_connection_string, echo=False)
         self.meta = sqlalchemy.MetaData()
