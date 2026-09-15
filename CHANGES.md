@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.1.5
+
+- Fixed procedure action to wrap the EXEC statement in `sqlalchemy.text()` as required by SQLAlchemy 2.0+
+  Contributed by Bradley Bishop (Encore Technologies)
+
 ## 1.1.4
 
 - Fixed several install and run issues related to updates to SQLAlchemy

@@ -34,7 +34,7 @@ class SQLProcedureAction(BaseAction):
 
         proc_name = self.get_del_arg('procedure_name', kwargs_dict)
 
-        exec_stmt = "EXEC {} {}".format(proc_name, proc_data_string)
+        exec_stmt = sqlalchemy.text("EXEC {} {}".format(proc_name, proc_data_string))
 
         database_connection_string = self.build_connection(kwargs_dict)
         engine = sqlalchemy.create_engine(database_connection_string)
