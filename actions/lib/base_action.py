@@ -114,7 +114,7 @@ class BaseAction(Action):
         default_driver = DEFAULT_KNOWN_DRIVER_CONNECTORS.get(connection['drivername'], None)
         if default_driver:
             connection['drivername'] = default_driver
-        
+
         # Fix issue with required query param
         # https://docs.sqlalchemy.org/en/20/core/engines.html#sqlalchemy.engine.URL.query
         connection['query'] = {}
@@ -134,8 +134,15 @@ class BaseAction(Action):
         self.meta = sqlalchemy.MetaData()
         conn = self.engine.connect()
 
+        # SQLAlchemy 2.0+ removed "autocommit" detection on text() statements.
+        # connect() begins a transaction and close() without commit() rolls it
+        # back, so explicitly commit when the action body succeeds.
         try:
             yield conn
+            conn.commit()
+        except Exception:
+            conn.rollback()
+            raise
         finally:
             conn.close()
 
