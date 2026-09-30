@@ -1,5 +1,12 @@
 # Change Log
 
+## 1.1.6
+
+- Fixed `query`, `insert`, `update`, and `delete` actions silently rolling back writes. SQLAlchemy 2.0+
+  no longer auto-commits `text()` statements, so `db_connection` now commits on success and rolls back on error.
+- Pinned `sqlalchemy>=2.0,<3` in requirements.txt
+  Contributed by Bradley Bishop (Encore Technologies)
+
 ## 1.1.5
 
 - Fixed procedure action to wrap the EXEC statement in `sqlalchemy.text()` as required by SQLAlchemy 2.0+

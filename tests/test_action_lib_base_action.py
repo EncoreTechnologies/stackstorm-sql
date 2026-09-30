@@ -239,23 +239,56 @@ class TestActionLibBaseAction(SqlBaseActionTestCase):
         connection_name = 'full'
         connection_config = self.config_good['connections'][connection_name]
         mock_engine = mock.Mock()
-        mock_engine.connect.return_value = 'Connected'
+        mock_conn = mock.Mock()
+        mock_engine.connect.return_value = mock_conn
         mock_sqlalchemy.create_engine.return_value = mock_engine
         mock_sqlalchemy.MetaData.return_value = 'MetaData'
 
-        action.db_connection(connection_config)
+        with action.db_connection(connection_config) as conn:
+            self.assertEqual(conn, mock_conn)
+            mock_conn.commit.assert_not_called()
+
+        mock_conn.commit.assert_called_once_with()
+        mock_conn.rollback.assert_not_called()
+        mock_conn.close.assert_called_once_with()
 
     @mock.patch('lib.base_action.sqlalchemy')
-    def test_connect_to_db_sqlite(self, mock_sqlalchemy):
+    def test_connect_to_db_rollback_on_error(self, mock_sqlalchemy):
+        action = self.get_action_instance(self.config_good)
+        connection_name = 'full'
+        connection_config = self.config_good['connections'][connection_name]
+        mock_engine = mock.Mock()
+        mock_conn = mock.Mock()
+        mock_engine.connect.return_value = mock_conn
+        mock_sqlalchemy.create_engine.return_value = mock_engine
+        mock_sqlalchemy.MetaData.return_value = 'MetaData'
+
+        with self.assertRaises(RuntimeError):
+            with action.db_connection(connection_config):
+                raise RuntimeError("query failed")
+
+        mock_conn.commit.assert_not_called()
+        mock_conn.rollback.assert_called_once_with()
+        mock_conn.close.assert_called_once_with()
+
+    @mock.patch('lib.base_action.BaseAction.build_connection')
+    @mock.patch('lib.base_action.sqlalchemy')
+    def test_connect_to_db_sqlite(self, mock_sqlalchemy, mock_build_connection):
         action = self.get_action_instance(self.config_good)
         connection_name = 'sqlite'
         connection_config = self.config_good['connections'][connection_name]
+        mock_build_connection.return_value = 'sqlite:///test.db'
         mock_engine = mock.Mock()
-        mock_engine.connect.return_value = 'Connected'
+        mock_conn = mock.Mock()
+        mock_engine.connect.return_value = mock_conn
         mock_sqlalchemy.create_engine.return_value = mock_engine
         mock_sqlalchemy.MetaData.return_value = 'MetaData'
 
-        action.db_connection(connection_config)
+        with action.db_connection(connection_config) as conn:
+            self.assertEqual(conn, mock_conn)
+
+        mock_conn.commit.assert_called_once_with()
+        mock_conn.close.assert_called_once_with()
 
     def test_resolve_connection_from_config(self):
         action = self.get_action_instance(self.config_good)
