@@ -1,5 +1,11 @@
 # Change Log
 
+## 1.1.7
+
+- Raised `psycopg2-binary` to `>=2.9.5,<3`. 2.8.6 has no Python 3.11 wheels, so the pack's
+  virtualenv failed to build on StackStorm 3.10 (Python 3.11).
+  Contributed by Jacob Huff (Encore Technologies)
+
 ## 1.1.6
 
 - Fixed `query`, `insert`, `update`, and `delete` actions silently rolling back writes. SQLAlchemy 2.0+
